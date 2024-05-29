@@ -1,0 +1,128 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8e8e8;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  width: 80%;
+  max-width: 1200px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+header h1 {
+  color: #ff914d;
+  margin-bottom: 20px;
+  font-size: 2em;
+}
+
+.target-nutrition {
+  width: 50%;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.target-nutrition h2 {
+  margin-top: 0;
+}
+
+.target-nutrition input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.main-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.add-food-item,
+.food-solutions {
+  flex: 1;
+  margin: 0 10px;
+  padding: 20px;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+.add-food-item h2,
+.food-solutions h2 {
+  margin-top: 0;
+}
+
+.input-group {
+  margin-bottom: 10px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#add-food-button,
+#calculate-button {
+  background-color: #ff914d;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+#add-food-button:hover,
+#calculate-button:hover {
+  background-color: #e07b3e;
+}
+
+.food-solutions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#food-solutions-list {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  text-align: center;
+}
+
+.food-item {
+  text-align: center;
+  margin: 10px;
+}
+
+.food-item img {
+  max-width: 100px;
+  border-radius: 8px;
+}

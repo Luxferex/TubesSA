@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nutrition Tracker</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>NUTRI-ON</h1>
+      </header>
+
+      <div class="target-nutrition">
+        <h2>Target Nutrition</h2>
+        <input type="text" placeholder="Enter target nutrition" />
+      </div>
+
+      <div class="main-content">
+        <div class="add-food-item">
+          <h2>List Makanan 1</h2>
+          <div class="input-group">
+            <label for="food-name">Nama Makanan</label>
+            <input type="text" id="food-name" placeholder="Isi Disini" />
+          </div>
+          <div class="input-group">
+            <label for="food-price">Harga Makanan</label>
+            <input type="number" id="food-price" placeholder="Isi Disini" />
+          </div>
+          <div class="input-group">
+            <label for="food-nutrition">Nutrisi Makanan</label>
+            <input type="number" id="food-nutrition" placeholder="Isi Disini" />
+          </div>
+          <button id="add-food-button">+</button>
+        </div>
+
+        <div class="food-solutions">
+          <h2>Solusi Makanan</h2>
+          <div id="food-solutions-list">
+            <div class="food-item">
+              <img src="sopbuah.jpg" alt="Sop Buah" />
+              <p>Sop Buah<br />120 kKal</p>
+            </div>
+            <div class="food-item">
+              <img src="nutrisi.png" alt="Vitamin" />
+              <p>Vitamin<br />100 kKal</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <label for="method">Choose a method:</label>
+      <select id="method">
+        <option value="greedy">Greedy</option>
+        <!-- Tambahkan opsi metode lain jika ada -->
+      </select>
+      <button id="calculate-button">CALCULATE</button>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
