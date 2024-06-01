@@ -14,15 +14,96 @@ class NutritionTracker {
   addFoodItem(name, price, nutrition) {
     const foodItem = new FoodItem(name, price, nutrition);
     this.foodItems.push(foodItem);
+    this.sortFoodItemsByNutrition();
+    this.updateFoodListTable();
   }
 
-  getRecommendations(targetNutrition) {
-    // Basic recommendation logic (for simplicity, just return all items)
-    return this.foodItems;
+  sortFoodItemsByNutrition() {
+    this.foodItems.sort((a, b) => b.nutrition - a.nutrition);
+  }
+
+  getRecommendations(method, targetNutrition) {
+    if (method === 'greedy') {
+      let remainingNutrition = targetNutrition;
+      const selectedItems = [];
+
+      for (let item of this.foodItems) {
+        if (remainingNutrition <= 0) break;
+        const count = Math.floor(remainingNutrition / item.nutrition);
+        if (count > 0) {
+          selectedItems.push({ ...item, count });
+          remainingNutrition -= count * item.nutrition;
+        }
+      }
+
+      return selectedItems;
+    } else if (method === 'bnb') {
+      const bestSolution = {
+        totalNutrition: 0,
+        totalPrice: 0,
+        items: [],
+      };
+
+      const processFoodItems = (remainingItems, currentSolution) => {
+        if (currentSolution.totalNutrition > targetNutrition) {
+          return;
+        }
+        if (remainingItems.length === 0 || currentSolution.totalNutrition === targetNutrition) {
+          if (currentSolution.totalNutrition <= targetNutrition && currentSolution.totalNutrition > bestSolution.totalNutrition) {
+            bestSolution.totalNutrition = currentSolution.totalNutrition;
+            bestSolution.totalPrice = currentSolution.totalPrice;
+            bestSolution.items = [...currentSolution.items];
+          }
+          return;
+        }
+
+        const newItem = remainingItems[0];
+        for (let count = Math.floor((targetNutrition - currentSolution.totalNutrition) / newItem.nutrition); count >= 0; count--) {
+          const newTotalNutrition = currentSolution.totalNutrition + count * newItem.nutrition;
+          const newTotalPrice = currentSolution.totalPrice + count * newItem.price;
+
+          processFoodItems(remainingItems.slice(1), {
+            totalNutrition: newTotalNutrition,
+            totalPrice: newTotalPrice,
+            items: [...currentSolution.items, { ...newItem, count }],
+          });
+        }
+      };
+
+      processFoodItems(this.foodItems, { totalNutrition: 0, totalPrice: 0, items: [] });
+
+      return bestSolution.items.filter((item) => item.count > 0);
+    } else {
+      return this.foodItems;
+    }
+  }
+
+  updateFoodListTable() {
+    const method = document.getElementById('method').value;
+    const foodListHeader = document.querySelector('.food-list h2');
+    foodListHeader.textContent = `Daftar Makanan (${method === 'greedy' ? 'Greedy' : 'Branch and Bound'})`;
+
+    const foodListTableBody = document.querySelector('#food-list-table tbody');
+    foodListTableBody.innerHTML = '';
+
+    this.foodItems.forEach((item) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+          <td>${item.name}</td>
+          <td>Rp ${item.price.toLocaleString('id-ID')}</td>
+          <td>${item.nutrition} kKal</td>
+        `;
+      foodListTableBody.appendChild(row);
+    });
   }
 }
 
 const tracker = new NutritionTracker();
+
+// Dummy data
+tracker.addFoodItem('Dada Ayam', 30000, 200);
+tracker.addFoodItem('Salmon Fillet', 40000, 250);
+tracker.addFoodItem('Sereal Gandum', 50000, 180);
 
 document.getElementById('add-food-button').addEventListener('click', () => {
   const name = document.getElementById('food-name').value;
@@ -41,92 +122,67 @@ document.getElementById('add-food-button').addEventListener('click', () => {
 });
 
 document.getElementById('calculate-button').addEventListener('click', () => {
+  const method = document.getElementById('method').value;
   const targetNutrition = parseInt(document.getElementById('target-nutrition-input').value);
 
-  if (!isNaN(targetNutrition)) {
-    const recommendations = tracker.getRecommendations(targetNutrition);
-    const solutionsList = document.getElementById('food-solutions-list');
-    solutionsList.innerHTML = '';
-
-    recommendations.forEach((item) => {
-      const foodItem = document.createElement('div');
-      foodItem.classList.add('food-item');
-      foodItem.innerHTML = `${item.name} (${item.nutrition} kKal)`;
-      solutionsList.appendChild(foodItem);
-    });
-  } else {
+  if (isNaN(targetNutrition)) {
     alert('Please enter a valid target nutrition value.');
+    return;
   }
+
+  const startTime = performance.now(); // Start timing
+
+  const recommendations = tracker.getRecommendations(method, targetNutrition);
+
+  const endTime = performance.now(); // End timing
+  const executionTime = endTime - startTime;
+
+  const solutionsList = document.getElementById('food-solutions-list');
+  solutionsList.innerHTML = '';
+
+  if (recommendations.length > 0) {
+    const table = document.createElement('table');
+    table.classList.add('food-list');
+
+    const thead = document.createElement('thead');
+    thead.innerHTML = `
+      <tr>
+        <th>Nama Makanan</th>
+        <th>Jumlah Makanan</th>
+        <th>Harga Total</th>
+        <th>Nutrisi Makanan</th>
+        <th>Execution Time</th>
+      </tr>
+    `;
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    recommendations.forEach((item) => {
+      const totalCost = item.price * item.count;
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${item.name}</td>
+        <td>${item.count}</td>
+        <td>Rp ${totalCost.toLocaleString('id-ID')}</td>
+        <td>${item.nutrition * item.count} kKal</td>
+        <td>${executionTime.toFixed(2)} ms</td>
+      `;
+      tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+
+    solutionsList.appendChild(table);
+  } else {
+    const noSolutionMessage = document.createElement('p');
+    noSolutionMessage.textContent = 'No solution found for the given target nutrition.';
+    solutionsList.appendChild(noSolutionMessage);
+
+    const executionTimeDisplay = document.createElement('div');
+    executionTimeDisplay.classList.add('execution-time');
+    executionTimeDisplay.innerHTML = `Execution time: ${executionTime.toFixed(2)} ms`;
+    solutionsList.appendChild(executionTimeDisplay);
+  }
+
+  const foodListHeader = document.querySelector('.food-list h2');
+  foodListHeader.textContent = `Daftar Makanan (${method === 'bnb' ? 'BnB' : method})`;
 });
-
-function greedyFoodSolution(foods, targetNutrition) {
-  const selectedFoods = [];
-  let remainingNutrition = { ...targetNutrition };
-
-  while (remainingNutrition.calories > 0 || remainingNutrition.protein > 0 || remainingNutrition.fat > 0) {
-    let bestFood = null;
-    let minDistance = Infinity;
-
-    for (const food of foods) {
-      const distance = Math.abs(food.calories - remainingNutrition.calories) + Math.abs(food.protein - remainingNutrition.protein) + Math.abs(food.fat - remainingNutrition.fat);
-
-      if (distance < minDistance) {
-        minDistance = distance;
-        bestFood = food;
-      }
-    }
-
-    selectedFoods.push(bestFood);
-    remainingNutrition.calories -= bestFood.calories;
-    remainingNutrition.protein -= bestFood.protein;
-    remainingNutrition.fat -= bestFood.fat;
-  }
-
-  return selectedFoods;
-}
-
-function calculateSolution() {
-  const methodSelect = document.getElementById('method');
-  const selectedMethod = methodSelect.value;
-
-  // Contoh daftar makanan dan target nutrisi
-  const foods = [
-    { name: 'Sop Buah', calories: 120, protein: 2, fat: 1 },
-    { name: 'Vitamin', calories: 100, protein: 1, fat: 0 },
-    // Tambahkan makanan lain jika diperlukan
-  ];
-
-  // Ambil target nutrisi dari input pengguna
-  const targetCalories = parseInt(document.getElementById('target-calories').value);
-  const targetProtein = parseInt(document.getElementById('target-protein').value);
-  const targetFat = parseInt(document.getElementById('target-fat').value);
-
-  const targetNutrition = { calories: targetCalories, protein: targetProtein, fat: targetFat };
-
-  let selectedFoods;
-
-  if (selectedMethod === 'greedy') {
-    selectedFoods = greedyFoodSolution(foods, targetNutrition);
-  }
-  // Tambahkan blok if untuk metode lain jika ada
-
-  displaySolution(selectedFoods);
-}
-
-function displaySolution(foods) {
-  const foodSolutionsList = document.getElementById('food-solutions-list');
-  foodSolutionsList.innerHTML = ''; // Kosongkan daftar makanan sebelum menambahkan solusi baru
-
-  foods.forEach((food) => {
-    const foodItem = document.createElement('div');
-    foodItem.classList.add('food-item');
-    const img = document.createElement('img');
-    img.src = `${food.name.toLowerCase().replace(' ', '-')}.jpg`; // Ubah nama makanan menjadi lowercase dan ganti spasi dengan tanda "-"
-    img.alt = food.name;
-    const p = document.createElement('p');
-    p.textContent = `${food.name}\n${food.calories} kKal`;
-    foodItem.appendChild(img);
-    foodItem.appendChild(p);
-    foodSolutionsList.appendChild(foodItem);
-  });
-}
