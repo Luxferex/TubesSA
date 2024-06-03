@@ -1,1 +1,1 @@
-Website Sederahana tentang Pengaplikasian Diet dengan preferensi Target nutrisi, menggunakan metode Greedy dan Branch and Bound
+Ini adalah Tugas besar dari Mata kuliah Strategi Algoritma
